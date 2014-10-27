@@ -8,7 +8,8 @@ Installing
 
 	go get github.com/iostrovok/go-osm-api/osmapi
 
-How use example
+
+How use example. See example for more infovation. They are in "./osmapi/example/" path.
 
 	> mkdir -p /mypath/go
 	> cd /mypath/go
@@ -27,7 +28,6 @@ How use example
 
 	# Delete old point 
 	> go run ./src/github.com/iostrovok/go-osm-api/osmapi/example/delete_node.go -nodeid=12313
-
 
 
 Using.
