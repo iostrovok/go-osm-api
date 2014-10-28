@@ -129,20 +129,21 @@ func (c *NodeSt) AddTag(k, v string) {
 /*
 When we want to modify or delete node we have get infomation from api.site
 */
-func (ChSet *ChangeSetSt) LoadNode(OsmId string) (*NodeSt, error) {
+func (Request *MyRequestSt) LoadNodeDate(OsmId string) (*NodeSt, error) {
 
 	/* Answer has to be empty */
-	data, err := ChSet.Request.GetXML("/api/0.6/node/" + OsmId)
+	data, err := Request.GetXML("/api/0.6/node/" + OsmId)
 	if err != nil {
 		return nil, err
 	}
 
 	n := NodeSt{}
 	n.Tag = []TagSt{}
-	n.ReqId = ChSet.Id
-	n.OsmId = OsmId
-	n.Lon = xml_str(data, "/osm/node/@lon")
 	n.Lat = xml_str(data, "/osm/node/@lat")
+	n.Lon = xml_str(data, "/osm/node/@lon")
+	n.OsmId = OsmId
+	n.ReqId = xml_str(data, "/osm/node/@changeset")
+	n.Timestamp = xml_str(data, "/osm/node/@timestamp")
 	n.Version = xml_str(data, "/osm/node/@version")
 	n.Visible = xml_str(data, "/osm/node/@visible")
 
@@ -150,12 +151,24 @@ func (ChSet *ChangeSetSt) LoadNode(OsmId string) (*NodeSt, error) {
 		return nil, errors.New("Note " + OsmId + " not found")
 	}
 
+	return &n, nil
+}
+
+func (ChSet *ChangeSetSt) LoadNode(OsmId string) (*NodeSt, error) {
+
+	/* Answer has to be empty */
+	n, err := ChSet.Request.LoadNodeDate(OsmId)
+	if err != nil {
+		return nil, err
+	}
+
+	n.ReqId = ChSet.Id
 	tm := time.Now()
 	n.Timestamp = tm.Format(TimeFormatLayout)
 
-	ChSet.OsmCh._addNode(&n)
+	ChSet.OsmCh._addNode(n)
 
-	return &n, nil
+	return n, nil
 }
 
 func (OsmCh *OsmChangeSt) _addNode(node *NodeSt, ways ...*WaySt) error {
