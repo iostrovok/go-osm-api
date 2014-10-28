@@ -197,9 +197,28 @@ func xml_str(data *xmlpath.Node, where string) string {
 	val, ok := path.String(data)
 
 	if !ok {
-		//log.Fatal("Test_MiscellPermissions. Not found '" + where + "'")
 		return ""
 	}
 
 	return val
+}
+
+func xml_slice(data *xmlpath.Node, where string, what []string) []map[string]string {
+
+	path := xmlpath.MustCompile(where)
+	iters := path.Iter(data)
+	out := []map[string]string{}
+
+	for iters.Next() {
+		one := iters.Node()
+
+		ph := map[string]string{}
+		for _, tag := range what {
+			ph[tag] = xml_str(one, "@"+tag)
+		}
+
+		out = append(out, ph)
+	}
+
+	return out
 }
