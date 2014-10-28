@@ -151,6 +151,16 @@ func (Request *MyRequestSt) LoadNodeDate(OsmId string) (*NodeSt, error) {
 		return nil, errors.New("Note " + OsmId + " not found")
 	}
 
+	for _, v := range xml_slice(data, "/osm/node/tag", []string{"k", "v"}) {
+		if v["k"] == "" || v["v"] == "" {
+			continue
+		}
+		t := TagSt{}
+		t.Key = v["k"]
+		t.Val = v["v"]
+		n.Tag = append(n.Tag, t)
+	}
+
 	return &n, nil
 }
 
