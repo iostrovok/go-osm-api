@@ -163,3 +163,67 @@ Part 3. Delete existing node (point)
 	}
 	/* ChSet is nil now */
 
+# Ways
+
+## Common action
+
+	/* Request object creating */
+	ChSet, err := req.Changesets("modify") // "delete", "create"
+	if err != nil {
+		log.Fatal(err)
+	}
+
+## Read existing way  
+	/* Loading existing way data */
+	way, err := ChSet.WayLoad("52868")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+## Create newg way  
+
+	/* Create new way */
+	way, err := ChSet.WayNew()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+## Create and add node into end of way 
+	node, err := ChSet.NewNode("0.017183, "51.506286")
+	if err != nil {
+		log.Fatal(err)
+	}
+	id, err := ChSet.WayAddNode(node)
+	if err != nil {
+		log.Fatal(err)
+	} 
+
+## Create and add node after node which has id = "123456789"
+	node, err := ChSet.NewNode("0.017183, "51.506286")
+	if err != nil {
+		log.Fatal(err)
+	}
+	id, err := ChSet.WayAddNode(node, "123456789")
+	if err != nil {
+		log.Fatal(err)
+	} 
+
+## Create and add node to first place of way
+	node, err := ChSet.NewNode("0.017183, "51.506286")
+	if err != nil {
+		log.Fatal(err)
+	}
+	id, err := ChSet.WayAddNode(node, "0")
+	if err != nil {
+		log.Fatal(err)
+	} 
+
+## Delete all nodes from way & changeset
+	if err := ChSet.WayDelAllNodes(); err != nil {
+		log.Fatal(err)
+	}
+
+## Delete node with id "123456789" from way & changeset
+	if err := ChSet.WayDelNode("123456789"); err != nil {
+		log.Fatal(err)
+	} 

@@ -22,6 +22,8 @@ const MainURLTest = "http://api06.dev.openstreetmap.org"
 const ProtocolVersion = "0.6"
 const TimeFormatLayout = "2006-01-02T15:04:05-07:00"
 const UserAgent = "Sputnik.Ru.Adminka" // Default user agent :)
+const User = "TestUser"                // Default user agent :)
+const UserId = "TestUser"              // Default user agent :)
 
 type myjar struct {
 	jar map[string][]*http.Cookie
@@ -108,7 +110,11 @@ func (m *MyRequestSt) makeSendRequest(Type, Url string, Content ...string) (stri
 	} else {
 		req, err = http.NewRequest(Type, Url, nil)
 	}
+
 	if err != nil {
+		if m.Debug {
+			log.Printf("Type: %s, Url: %s, error: %s \n", Type, Url, err)
+		}
 		return "", err
 	}
 
@@ -126,16 +132,25 @@ func (m *MyRequestSt) makeSendRequest(Type, Url string, Content ...string) (stri
 
 	res, err_d := client.Do(req)
 	if err_d != nil {
+		if m.Debug {
+			log.Printf("Type: %s, Url: %s, error: %s \n", Type, Url, err_d)
+		}
 		return "", err_d
 	}
 
 	body, err_r := ioutil.ReadAll(res.Body)
 	res.Body.Close()
 	if err_r != nil {
+		if m.Debug {
+			log.Printf("Type: %s, Url: %s, error: %s \n", Type, Url, err_r)
+		}
 		return "", err_r
 	}
 
 	if res.StatusCode != 200 {
+		if m.Debug {
+			log.Printf("Type: %s, Url: %s, StatusCode: %d, error: %s \n", Type, Url, res.StatusCode, string(body))
+		}
 		return "", errors.New(string(body))
 	}
 

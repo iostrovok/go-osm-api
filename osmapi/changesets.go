@@ -14,6 +14,7 @@ type ChangeSetSt struct {
 	Id      string
 	Request *MyRequestSt
 	OsmCh   *OsmChangeSt
+	//Type   string     // node, way rel
 }
 
 type TagSt struct {
@@ -23,46 +24,33 @@ type TagSt struct {
 }
 
 type TagListSt struct {
-	List []TagSt
+	List []*TagSt
 }
 
-func NewTag(k, v string) TagSt {
+func NewTag(k, v string) *TagSt {
 	t := TagSt{}
 	t.Key = k
 	t.Val = v
-	return t
-}
-
-type WaySt struct {
-	Tag       []TagSt `xml:"tag"`
-	OsmId     string  `xml:"id,attr"`
-	ReqId     string  `xml:"changeset,attr"`
-	Visible   string  `xml:"visible,attr"`
-	Lon       string  `xml:"lon,attr"`
-	Lat       string  `xml:"lat,attr"`
-	Version   string  `xml:"version,attr"`
-	User      string  `xml:"user,attr"`
-	Uid       string  `xml:"uid,attr"`
-	Timestamp string  `xml:"timestamp,attr"`
+	return &t
 }
 
 type NodeSt struct {
-	Tag       []TagSt `xml:"tag,omitempty"`
-	OsmId     string  `xml:"id,attr,omitempty"`
-	ReqId     string  `xml:"changeset,attr"`
-	Visible   string  `xml:"visible,attr"`
-	Lon       string  `xml:"lon,attr,omitempty"`
-	Lat       string  `xml:"lat,attr,omitempty"`
-	Version   string  `xml:"version,attr,omitempty"`
-	User      string  `xml:"user,attr,omitempty"`
-	Uid       string  `xml:"uid,attr,omitempty"`
-	Timestamp string  `xml:"timestamp,attr,omitempty"`
+	Tag       []*TagSt `xml:"tag,omitempty"`
+	OsmId     string   `xml:"id,attr,omitempty"`
+	ReqId     string   `xml:"changeset,attr"`
+	Visible   string   `xml:"visible,attr"`
+	Lon       string   `xml:"lon,attr,omitempty"`
+	Lat       string   `xml:"lat,attr,omitempty"`
+	Version   string   `xml:"version,attr,omitempty"`
+	User      string   `xml:"user,attr,omitempty"`
+	Uid       string   `xml:"uid,attr,omitempty"`
+	Timestamp string   `xml:"timestamp,attr,omitempty"`
 }
 
 type ChangeSt struct {
 	//XMLName xml.Name `xml:",omitempty"`
-	Node []*NodeSt `xml:"node"`
-	Way  []*WaySt  `xml:"way"`
+	Node []*NodeSt `xml:"node,omitempty"`
+	Way  *WaySt    `xml:"way,omitempty"`
 }
 
 type OsmChangeSt struct {
@@ -104,15 +92,13 @@ func (ChSet *ChangeSetSt) OsmChange(t string) error {
 	OsmCh := OsmChangeSt{}
 
 	if t != "create" && t != "modify" && t != "delete" && t != "changeset" {
-		log.Fatalf("OsmChange. You have to use create|modify|delete as OsmChange type. Now it is `%s`", t)
+		return errors.New("OsmChange. You have to use create|modify|delete as OsmChange type. Now it is " + t)
 	}
 
 	OsmCh.Type = t
 	OsmCh.Version = ProtocolVersion
 	OsmCh.Generator = UserAgent
-	nodes := []*NodeSt{}
-	ways := []*WaySt{}
-	ch := ChangeSt{nodes, ways}
+	ch := ChangeSt{[]*NodeSt{}, nil}
 
 	switch OsmCh.Type {
 	case "modify":
@@ -129,7 +115,13 @@ func (ChSet *ChangeSetSt) OsmChange(t string) error {
 }
 
 func (c *NodeSt) AddTag(k, v string) {
-	c.Tag = append(c.Tag, NewTag(k, v))
+	n := []*TagSt{NewTag(k, v)}
+	for _, one := range c.Tag {
+		if one.Key != k {
+			n = append(n, one)
+		}
+	}
+	c.Tag = n
 }
 
 /*
@@ -144,7 +136,7 @@ func (Request *MyRequestSt) LoadNodeDate(OsmId string) (*NodeSt, error) {
 	}
 
 	n := NodeSt{}
-	n.Tag = []TagSt{}
+	n.Tag = []*TagSt{}
 	n.Lat = xml_str(data, "/osm/node/@lat")
 	n.Lon = xml_str(data, "/osm/node/@lon")
 	n.OsmId = OsmId
@@ -164,7 +156,7 @@ func (Request *MyRequestSt) LoadNodeDate(OsmId string) (*NodeSt, error) {
 		t := TagSt{}
 		t.Key = v["k"]
 		t.Val = v["v"]
-		n.Tag = append(n.Tag, t)
+		n.Tag = append(n.Tag, &t)
 	}
 
 	return &n, nil
@@ -187,11 +179,7 @@ func (ChSet *ChangeSetSt) LoadNode(OsmId string) (*NodeSt, error) {
 	return n, nil
 }
 
-func (OsmCh *OsmChangeSt) _addNode(node *NodeSt, ways ...*WaySt) error {
-
-	if len(ways) > 0 {
-		//ways[0].
-	}
+func (OsmCh *OsmChangeSt) _addNode(node *NodeSt) error {
 
 	switch OsmCh.Type {
 	case "modify":
@@ -211,7 +199,7 @@ When we creat new node
 func (ChSet *ChangeSetSt) NewNode(Lat, Lon string) (*NodeSt, error) {
 
 	n := NodeSt{}
-	n.Tag = []TagSt{}
+	n.Tag = []*TagSt{}
 	n.ReqId = ChSet.Id
 	n.OsmId = ""
 	n.Lon = Lon
@@ -254,7 +242,7 @@ func (ChSet *ChangeSetSt) Create() error {
 	t := OsmSt{}
 	t.Version = "0.6"
 	t.Generator = UserAgent
-	t.Changeset = &TagListSt{[]TagSt{NewTag("comment", "changeset comment"), NewTag("created_by", UserAgent)}}
+	t.Changeset = &TagListSt{[]*TagSt{NewTag("comment", "changeset comment"), NewTag("created_by", UserAgent)}}
 	body2, err2 := xml.MarshalIndent(t, "", "")
 	if err2 != nil {
 		return err2
@@ -293,16 +281,97 @@ func (ChSet *ChangeSetSt) Upload() (string, error) {
 		return "", err
 	}
 
-	old_id := xml_str(data, "/diffResult/node/@old_id")
-	new_id := xml_str(data, "/diffResult/node/@new_id")
+	node_old_id := xml_str(data, "/diffResult/node/@old_id")
+	node_new_id := xml_str(data, "/diffResult/node/@new_id")
+	way_old_id := xml_str(data, "/diffResult/way/@old_id")
+	way_new_id := xml_str(data, "/diffResult/way/@new_id")
 
-	if ChSet.OsmCh.Type == "modify" && old_id != new_id {
-		return "", errors.New("Bad result")
+	err_line := "Bad result ChangeSetSt upload."
+
+	if ChSet.OsmCh.Type == "modify" {
+		if node_old_id != "" && node_old_id != node_new_id {
+			return "", errors.New(err_line + "Old node id equals new.")
+		} else if way_old_id != "" && way_old_id != way_new_id {
+			return "", errors.New(err_line + " Modify. Old way id equals new.")
+		}
 	}
 
-	if (ChSet.OsmCh.Type == "modify" || ChSet.OsmCh.Type == "create") && "" == new_id {
-		return "", errors.New("Bad result")
+	if ChSet.OsmCh.Type == "delete" && "0" != node_new_id && "" != way_new_id {
+		return "", errors.New(err_line + " Delete. Bad new id " + ChSet.OsmCh.Type)
 	}
 
-	return new_id, err
+	if ChSet.OsmCh.Type == "create" && "" == node_new_id && "" == way_new_id {
+		return "", errors.New(err_line + " Create. New  node/way id empty.")
+	}
+
+	if way_new_id != "" {
+		return way_new_id, nil
+	}
+	return node_new_id, nil
+}
+
+/*
+
+Access functions to nodes
+
+*/
+func (OsmCh *OsmChangeSt) Nodes() []*NodeSt {
+
+	switch OsmCh.Type {
+	case "modify":
+		return OsmCh.Modify.Node
+	case "create":
+		return OsmCh.Create.Node
+	case "delete":
+		return OsmCh.Delete.Node
+	}
+
+	return []*NodeSt{}
+}
+
+func (OsmCh *OsmChangeSt) Node(NodeId string) *NodeSt {
+	list := OsmCh.Nodes()
+	for _, v := range list {
+		if v.OsmId == NodeId {
+			return v
+		}
+	}
+	return nil
+}
+
+func (ChSet *ChangeSetSt) DelAllNodes() error {
+	return ChSet.OsmCh.DelAllNodes()
+}
+
+func (OsmCh *OsmChangeSt) DelAllNodes() error {
+
+	if OsmCh.Modify != nil {
+		OsmCh.Modify.Node = nil
+	}
+	if OsmCh.Create != nil {
+		OsmCh.Create.Node = nil
+	}
+	if OsmCh.Delete != nil {
+		OsmCh.Delete.Node = nil
+	}
+
+	return nil
+}
+
+func (ChSet *ChangeSetSt) DelNode(NodeId string) error {
+	return ChSet.OsmCh.DelNode(NodeId)
+}
+
+func (OsmCh *OsmChangeSt) DelNode(NodeId string) error {
+	list := OsmCh.Nodes()
+	OsmCh.DelAllNodes()
+
+	for _, v := range list {
+		if v.OsmId == NodeId {
+			continue
+		}
+		OsmCh._addNode(v)
+	}
+
+	return nil
 }
