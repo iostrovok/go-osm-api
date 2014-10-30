@@ -1,15 +1,19 @@
-GOLANG interface for OpenStreetMap API v0.6
+# GOLANG interface for OpenStreetMap API v0.6
 
 	NOTICE! It is developer version.
 
+### Introduction
+
 Please see more inforamtion in OSM wiki: http://wiki.openstreetmap.org/wiki/API_v0.6
 
-Installing 
+### Installing 
 
 	go get github.com/iostrovok/go-osm-api/osmapi
 
 
-How use example. See example for more infovation. They are in "./osmapi/example/" path.
+### How use example.
+
+See example for more inforamtion. They are in "./osmapi/example/" path.
 
 	> mkdir -p /mypath/go
 	> cd /mypath/go
@@ -30,9 +34,19 @@ How use example. See example for more infovation. They are in "./osmapi/example/
 	> go run ./src/github.com/iostrovok/go-osm-api/osmapi/example/delete_node.go -nodeid=12313
 
 
-Using.
+# Using.
 
-Part 1. Create new node (point)
+## Nodes
+
+### Common action
+
+	/* Request object creating */
+	ChSet, err := req.Changesets("modify") // "delete", "create"
+	if err != nil {
+		log.Fatal(err)
+	}
+
+### Create new node (point)
 
 	import "github.com/iostrovok/go-osm-api/osmapi"
 	import "log"
@@ -78,7 +92,7 @@ Part 1. Create new node (point)
 	/* ChSet is nil now */
 
 
-Part 2. Modify existing node (point)
+### Modify existing node (point)
 
 	import "github.com/iostrovok/go-osm-api/osmapi"
 	import "log"
@@ -129,7 +143,7 @@ Part 2. Modify existing node (point)
 	/* ChSet is nil now */
 
 
-Part 3. Delete existing node (point)
+### Delete existing node (point)
 
 	import "github.com/iostrovok/go-osm-api/osmapi"
 	import "log"
@@ -163,9 +177,9 @@ Part 3. Delete existing node (point)
 	}
 	/* ChSet is nil now */
 
-# Ways
+## Ways
 
-## Common action
+### Common action
 
 	/* Request object creating */
 	ChSet, err := req.Changesets("modify") // "delete", "create"
@@ -173,14 +187,14 @@ Part 3. Delete existing node (point)
 		log.Fatal(err)
 	}
 
-## Read existing way  
+### Read existing way  
 	/* Loading existing way data */
 	way, err := ChSet.WayLoad("52868")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-## Create newg way  
+### Create newg way  
 
 	/* Create new way */
 	way, err := ChSet.WayNew()
@@ -188,7 +202,7 @@ Part 3. Delete existing node (point)
 		log.Fatal(err)
 	}
 
-## Create and add node into end of way 
+### Create and add node into end of way 
 	node, err := ChSet.NewNode("0.017183, "51.506286")
 	if err != nil {
 		log.Fatal(err)
@@ -198,7 +212,7 @@ Part 3. Delete existing node (point)
 		log.Fatal(err)
 	} 
 
-## Create and add node after node which has id = "123456789"
+### Create and add node after node which has id = "123456789"
 	node, err := ChSet.NewNode("0.017183, "51.506286")
 	if err != nil {
 		log.Fatal(err)
@@ -208,7 +222,7 @@ Part 3. Delete existing node (point)
 		log.Fatal(err)
 	} 
 
-## Create and add node to first place of way
+### Create and add node to first place of way
 	node, err := ChSet.NewNode("0.017183, "51.506286")
 	if err != nil {
 		log.Fatal(err)
@@ -218,12 +232,12 @@ Part 3. Delete existing node (point)
 		log.Fatal(err)
 	} 
 
-## Delete all nodes from way & changeset
+### Delete all nodes from way & changeset
 	if err := ChSet.WayDelAllNodes(); err != nil {
 		log.Fatal(err)
 	}
 
-## Delete node with id "123456789" from way & changeset
+### Delete node with id "123456789" from way & changeset
 	if err := ChSet.WayDelNode("123456789"); err != nil {
 		log.Fatal(err)
 	} 
