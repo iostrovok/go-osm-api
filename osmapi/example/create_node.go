@@ -13,12 +13,8 @@ func CreateNode(req *osmapi.MyRequestSt, Lat, Lon string) {
 		log.Fatal("No setup Lat or Lon param")
 	}
 
-	ChSet, err := req.Changesets()
+	ChSet, err := req.Changesets("create")
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := ChSet.OsmChange("create"); err != nil {
 		log.Fatal(err)
 	}
 

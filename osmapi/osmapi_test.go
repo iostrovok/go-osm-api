@@ -72,7 +72,7 @@ func Test_ChangeSetCreate(t *testing.T) {
 		return
 	}
 
-	c, err := req.Changesets()
+	c, err := req.Changesets("delete")
 	if err != nil {
 		log.Println("Test_ChangeSetCreate. Create")
 		t.Fatal(err)
@@ -153,7 +153,13 @@ func Test_MiscellCap(t *testing.T) {
 	}
 }
 
-func Test_01_CreateSetUpload(t *testing.T) {
+func Test_Node(t *testing.T) {
+	_01_CreateSetUpload(t)
+	_02_ChangeSetUpload(t)
+	_03_DeleteSetUpload(t)
+}
+
+func _01_CreateSetUpload(t *testing.T) {
 
 	req := init_req(t, "CreateSetUpload")
 	if req == nil {
@@ -162,21 +168,16 @@ func Test_01_CreateSetUpload(t *testing.T) {
 
 	req.SetDebug()
 
-	ChSet, err := req.Changesets()
+	ChSet, err := req.Changesets("create")
 	if err != nil {
-		log.Println("Test_CreateSetUpload. Create")
-		t.Fatal(err)
-	}
-
-	if err := ChSet.OsmChange("create"); err != nil {
-		log.Println("Test_CreateSetUpload. OsmChange")
+		log.Println("_01_CreateSetUpload. Create")
 		t.Fatal(err)
 	}
 
 	/* Create new node */
 	node, err_n := ChSet.NewNode(TestLat, TestLon)
 	if err_n != nil {
-		log.Println("Test_CreateSetUpload. NewNode")
+		log.Println("_01_CreateSetUpload. NewNode")
 		t.Fatal(err_n)
 	}
 
@@ -189,11 +190,9 @@ func Test_01_CreateSetUpload(t *testing.T) {
 	//req.SetDebug()
 
 	/* Upload new data */
-	if new_id, err := ChSet.Upload(); err != nil {
-		log.Println("Test_02_ChangeSetUpload. Upload")
+	if TestNodeId, err = ChSet.Upload(); err != nil {
+		log.Println("_01_CreateSetUpload. Upload")
 		t.Fatal(err)
-	} else {
-		TestNodeId = new_id
 	}
 
 	_ChangeSetClose(t, ChSet)
@@ -201,10 +200,10 @@ func Test_01_CreateSetUpload(t *testing.T) {
 	//t.Fatal("test view")
 }
 
-func Test_02_ChangeSetUpload(t *testing.T) {
+func _02_ChangeSetUpload(t *testing.T) {
 
 	if TestNodeId == "" {
-		log.Fatal("Test_02_ChangeSetUpload. No set TestNodeId")
+		log.Fatal("_02_ChangeSetUpload. No set TestNodeId")
 	}
 
 	req := init_req(t, "ChangeSetUpload")
@@ -214,21 +213,16 @@ func Test_02_ChangeSetUpload(t *testing.T) {
 
 	req.SetDebug()
 
-	ChSet, err := req.Changesets()
+	ChSet, err := req.Changesets("modify")
 	if err != nil {
-		log.Println("Test_02_ChangeSetUpload. Create")
-		t.Fatal(err)
-	}
-
-	if err := ChSet.OsmChange("modify"); err != nil {
-		log.Println("Test_02_ChangeSetUpload. OsmChange")
+		log.Println("_02_ChangeSetUpload. Create")
 		t.Fatal(err)
 	}
 
 	/* Create new node */
 	node, err_n := ChSet.LoadNode(TestNodeId)
 	if err_n != nil {
-		log.Println("Test_02_ChangeSetUpload. LoadNode")
+		log.Println("_02_ChangeSetUpload. LoadNode")
 		t.Fatal(err_n)
 	}
 
@@ -242,7 +236,7 @@ func Test_02_ChangeSetUpload(t *testing.T) {
 
 	/* Upload new data */
 	if _, err := ChSet.Upload(); err != nil {
-		log.Println("Test_02_ChangeSetUpload. Upload")
+		log.Println("_02_ChangeSetUpload. Upload")
 		t.Fatal(err)
 	}
 
@@ -251,10 +245,10 @@ func Test_02_ChangeSetUpload(t *testing.T) {
 	//t.Fatal("test view")
 }
 
-func Test_03_DeleteSetUpload(t *testing.T) {
+func _03_DeleteSetUpload(t *testing.T) {
 
 	if TestNodeId == "" {
-		log.Fatal("Test_03_DeleteSetUpload. No set TestNodeId")
+		log.Fatal("_03_DeleteSetUpload. No set TestNodeId")
 	}
 
 	req := init_req(t, "DeleteSetUpload")
@@ -264,27 +258,22 @@ func Test_03_DeleteSetUpload(t *testing.T) {
 
 	req.SetDebug()
 
-	ChSet, err := req.Changesets()
+	ChSet, err := req.Changesets("delete")
 	if err != nil {
-		log.Println("Test_03_DeleteSetUpload. Create")
-		t.Fatal(err)
-	}
-
-	if err := ChSet.OsmChange("delete"); err != nil {
-		log.Println("Test_03_DeleteSetUpload. OsmChange")
+		log.Println("_03_DeleteSetUpload. Create")
 		t.Fatal(err)
 	}
 
 	/* Create new node */
 	_, err_n := ChSet.LoadNode(TestNodeId)
 	if err_n != nil {
-		log.Println("Test_03_DeleteSetUpload. LoadNode")
+		log.Println("_03_DeleteSetUpload. LoadNode")
 		t.Fatal(err_n)
 	}
 
 	/* Upload new data */
 	if _, err := ChSet.Upload(); err != nil {
-		log.Println("Test_03_DeleteSetUpload. Upload")
+		log.Println("_03_DeleteSetUpload. Upload")
 		t.Fatal(err)
 	}
 
