@@ -17,13 +17,8 @@ func ModifyNode(req *osmapi.MyRequestSt, NodeId int, k, v string) {
 	req.SetDebug()
 
 	/* Make object for request */
-	ChSet, err := req.Changesets()
-
+	ChSet, err := req.Changesets("modify")
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := ChSet.OsmChange("modify"); err != nil {
 		log.Fatal(err)
 	}
 

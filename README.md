@@ -47,12 +47,8 @@ Part 1. Create new node (point)
 	}
 
 	/* Make object for request */
-	ChSet, err := req.Changesets()
+	ChSet, err := req.Changesets("create")
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := ChSet.OsmChange("create"); err != nil {
 		log.Fatal(err)
 	}
 
@@ -93,15 +89,11 @@ Part 2. Modify existing node (point)
 	}
 
 	/* Make object for request */
-	ChSet, err := req.Changesets()
-
+	ChSet, err := req.Changesets("modify")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := ChSet.OsmChange("modify"); err != nil {
-		log.Fatal(err)
-	}
 
 	/* 
 		FIRST. Load node's date for modification
@@ -150,12 +142,8 @@ Part 3. Delete existing node (point)
 	}
 
 	/* Make object for request */
-	ChSet, err := req.Changesets()
+	ChSet, err := req.Changesets("delete")
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := ChSet.OsmChange("delete"); err != nil {
 		log.Fatal(err)
 	}
 

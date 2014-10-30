@@ -16,13 +16,8 @@ func DeleteNode(req *osmapi.MyRequestSt, NodeId int) {
 
 	req.SetDebug()
 
-	ChSet, err := req.Changesets()
-
+	ChSet, err := req.Changesets("delete")
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := ChSet.OsmChange("delete"); err != nil {
 		log.Fatal(err)
 	}
 

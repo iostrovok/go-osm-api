@@ -3,7 +3,6 @@ package osmapi
 import (
 	"encoding/xml"
 	"errors"
-	"log"
 	"time"
 )
 
@@ -84,13 +83,20 @@ type OsmSt struct {
 	Changeset *TagListSt `xml:"changeset,omitempty"`
 }
 
-func (r *MyRequestSt) Changesets() (*ChangeSetSt, error) {
+func (r *MyRequestSt) Changesets(t string) (*ChangeSetSt, error) {
 	c := ChangeSetSt{}
 
 	c.Id = ""
 	c.Request = r
-	err := c.Create()
-	return &c, err
+	if err := c.Create(); err != nil {
+		return nil, err
+	}
+
+	if err := c.OsmChange(t); err != nil {
+		return nil, err
+	}
+
+	return &c, nil
 }
 
 /*   */
