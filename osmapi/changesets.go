@@ -49,8 +49,9 @@ type NodeSt struct {
 
 type ChangeSt struct {
 	//XMLName xml.Name `xml:",omitempty"`
-	Node []*NodeSt `xml:"node,omitempty"`
-	Way  *WaySt    `xml:"way,omitempty"`
+	Node     []*NodeSt   `xml:"node,omitempty"`
+	Way      *WaySt      `xml:"way,omitempty"`
+	Relation *RelationSt `xml:"relation,omitempty"`
 }
 
 type OsmChangeSt struct {
@@ -98,7 +99,7 @@ func (ChSet *ChangeSetSt) OsmChange(t string) error {
 	OsmCh.Type = t
 	OsmCh.Version = ProtocolVersion
 	OsmCh.Generator = UserAgent
-	ch := ChangeSt{[]*NodeSt{}, nil}
+	ch := ChangeSt{[]*NodeSt{}, nil, nil}
 
 	switch OsmCh.Type {
 	case "modify":
@@ -127,10 +128,10 @@ func (c *NodeSt) AddTag(k, v string) {
 /*
 When we want to modify or delete node we have get infomation from api.site
 */
-func (Request *MyRequestSt) LoadNodeDate(OsmId string) (*NodeSt, error) {
+func (ChSet *ChangeSetSt) LoadNodeDate(OsmId string) (*NodeSt, error) {
 
 	/* Answer has to be empty */
-	data, err := Request.GetXML("/api/0.6/node/" + OsmId)
+	data, err := ChSet.Request.GetXML("/api/0.6/node/" + OsmId)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +166,7 @@ func (Request *MyRequestSt) LoadNodeDate(OsmId string) (*NodeSt, error) {
 func (ChSet *ChangeSetSt) LoadNode(OsmId string) (*NodeSt, error) {
 
 	/* Answer has to be empty */
-	n, err := ChSet.Request.LoadNodeDate(OsmId)
+	n, err := ChSet.LoadNodeDate(OsmId)
 	if err != nil {
 		return nil, err
 	}
@@ -281,33 +282,24 @@ func (ChSet *ChangeSetSt) Upload() (string, error) {
 		return "", err
 	}
 
-	node_old_id := xml_str(data, "/diffResult/node/@old_id")
-	node_new_id := xml_str(data, "/diffResult/node/@new_id")
-	way_old_id := xml_str(data, "/diffResult/way/@old_id")
-	way_new_id := xml_str(data, "/diffResult/way/@new_id")
+	old_id := xml_str(data, "/diffResult/*/@old_id")
+	new_id := xml_str(data, "/diffResult/*/@new_id")
 
 	err_line := "Bad result ChangeSetSt upload."
 
-	if ChSet.OsmCh.Type == "modify" {
-		if node_old_id != "" && node_old_id != node_new_id {
-			return "", errors.New(err_line + "Old node id equals new.")
-		} else if way_old_id != "" && way_old_id != way_new_id {
-			return "", errors.New(err_line + " Modify. Old way id equals new.")
-		}
+	if ChSet.OsmCh.Type == "modify" && old_id != new_id {
+		return "", errors.New(err_line + "Old node|relation|way id equals new.")
 	}
 
-	if ChSet.OsmCh.Type == "delete" && "0" != node_new_id && "" != way_new_id {
-		return "", errors.New(err_line + " Delete. Bad new id " + ChSet.OsmCh.Type)
+	if ChSet.OsmCh.Type == "delete" && "0" != new_id && "" != new_id {
+		return "", errors.New(err_line + " Delete node|relation|way. Bad new id for" + ChSet.OsmCh.Type)
 	}
 
-	if ChSet.OsmCh.Type == "create" && "" == node_new_id && "" == way_new_id {
-		return "", errors.New(err_line + " Create. New  node/way id empty.")
+	if ChSet.OsmCh.Type == "create" && ("" == new_id || "0" == new_id) {
+		return "", errors.New(err_line + " Create. New node|relation|way id empty.")
 	}
 
-	if way_new_id != "" {
-		return way_new_id, nil
-	}
-	return node_new_id, nil
+	return new_id, nil
 }
 
 /*
