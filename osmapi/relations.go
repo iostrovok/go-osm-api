@@ -64,7 +64,6 @@ func (ChSet *ChangeSetSt) RelationNew() (*RelationSt, error) {
 	r.Timestamp = tm.Format(TimeFormatLayout)
 
 	ChSet.OsmCh._setRelation(&r)
-	ChSet.OsmCh.ChangeType = "relation"
 
 	return &r, nil
 }

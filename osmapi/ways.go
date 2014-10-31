@@ -71,7 +71,6 @@ func (ChSet *ChangeSetSt) WayNew() (*WaySt, error) {
 	w.Timestamp = tm.Format(TimeFormatLayout)
 
 	ChSet.OsmCh._setWay(&w)
-	ChSet.OsmCh.ChangeType = "way"
 
 	return &w, nil
 }

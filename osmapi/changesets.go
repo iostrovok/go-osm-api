@@ -3,7 +3,7 @@ package osmapi
 import (
 	"encoding/xml"
 	"errors"
-	"log"
+	"gopkg.in/xmlpath.v2"
 )
 
 /* ===
@@ -25,15 +25,14 @@ type ChangeSt struct {
 }
 
 type OsmChangeSt struct {
-	XMLName    xml.Name   `xml:"osmChange"`
-	Version    string     `xml:"version,attr"`
-	Generator  string     `xml:"generator,attr"`
-	Modify     *ChangeSt  `xml:"modify,omitempty"`
-	Create     *ChangeSt  `xml:"create,omitempty"`
-	Delete     *ChangeSt  `xml:"delete,omitempty"`
-	Changeset  *TagListSt `xml:"changeset,omitempty"`
-	Type       string     `xml:"-"`
-	ChangeType string     `xml:"-"`
+	XMLName   xml.Name   `xml:"osmChange"`
+	Version   string     `xml:"version,attr"`
+	Generator string     `xml:"generator,attr"`
+	Modify    *ChangeSt  `xml:"modify,omitempty"`
+	Create    *ChangeSt  `xml:"create,omitempty"`
+	Delete    *ChangeSt  `xml:"delete,omitempty"`
+	Changeset *TagListSt `xml:"changeset,omitempty"`
+	Type      string     `xml:"-"`
 }
 
 type OsmSt struct {
@@ -152,24 +151,41 @@ func (ChSet *ChangeSetSt) Upload() (string, error) {
 		return "", err
 	}
 
-	log.Println("REEEEEEEED: /diffResult/" + ChSet.OsmCh.ChangeType + "/@new_id")
-
-	old_id := xml_str(data, "/diffResult/"+ChSet.OsmCh.ChangeType+"/@old_id")
-	new_id := xml_str(data, "/diffResult/"+ChSet.OsmCh.ChangeType+"/@new_id")
+	old_id, new_id := _read_result_id(data)
 
 	err_line := "Bad result ChangeSetSt upload."
 
 	if ChSet.OsmCh.Type == "modify" && old_id != new_id {
-		return "", errors.New(err_line + "Old " + ChSet.OsmCh.ChangeType + " id equals new.")
+		return "", errors.New(err_line + "Old relation|way|node id equals new.")
 	}
 
 	if ChSet.OsmCh.Type == "delete" && "0" != new_id && "" != new_id {
-		return "", errors.New(err_line + " Delete " + ChSet.OsmCh.ChangeType + ". Bad new id for " + ChSet.OsmCh.Type)
+		return "", errors.New(err_line + " Delete relation|way|node. Bad new id for " + ChSet.OsmCh.Type)
 	}
 
 	if ChSet.OsmCh.Type == "create" && ("" == new_id || "0" == new_id) {
-		return "", errors.New(err_line + " Create. New " + ChSet.OsmCh.ChangeType + " id empty for " + ChSet.OsmCh.Type)
+		return "", errors.New(err_line + " Create. New relation|way|node id empty for " + ChSet.OsmCh.Type)
 	}
 
 	return new_id, nil
+}
+
+func _read_result_id(data *xmlpath.Node) (string, string) {
+
+	/* Order is very important  */
+	s := []string{"relation", "way", "node"}
+	for _, v := range s {
+		old_id := xml_str(data, "/diffResult/"+v+"/@old_id")
+		new_id := xml_str(data, "/diffResult/"+v+"/@new_id")
+		if new_id != "" {
+			return old_id, new_id
+		}
+
+		if old_id != "" {
+			return old_id, new_id
+		}
+
+	}
+
+	return "", ""
 }
