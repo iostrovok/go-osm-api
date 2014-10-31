@@ -1,23 +1,12 @@
 package osmapi
 
 import (
-	"github.com/davecgh/go-spew/spew"
 	"log"
-	"math/rand"
 	"os"
-	//"strconv"
 	"testing"
 )
 
-//export OSM_URL="http://api06.dev.openstreetmap.org"; export OSM_USER="lashko@corp.sputnik.ru"; export OSM_PASSWD="gdezhivetsputnik2";cd /kmsearch/go-osm-api/; set GOPATH="/kmsearch/go-osm-api/"; go test ./osmapi/relations.go ./osmapi/osmapi_relations_test.go ./osmapi/osmapi.go ./osmapi/changesets.go ./osmapi/capabilities.go
-
-const minimumVersion = "0.6"
-const maximumVersion = "0.6"
-
-var (
-	rnd            *rand.Rand = rand.New(rand.NewSource(99))
-	TestRelationId string     = ""
-)
+var TestRelationId string = ""
 
 func Test_MyRequestSt(t *testing.T) {
 	req := MyRequest()
@@ -39,12 +28,6 @@ func init_req(t *testing.T, title string) *MyRequestSt {
 		return nil
 	}
 
-	/*
-		if "CreateSetUpload" != title && "DeleteSetUpload" != title && "ChangeSetUpload" != title {
-			return nil
-		}
-	*/
-
 	req := MyRequest()
 	req.UserPass(login, pass)
 	if url == "" {
@@ -64,7 +47,7 @@ func _ChangeSetClose(t *testing.T, c *ChangeSetSt) {
 }
 
 func Test_Relations(t *testing.T) {
-	//_01_RelationLoad(t)
+	_01_RelationLoad(t)
 	_02_CreateRelations(t)
 	_03_ModifyRelations(t)
 	_04_DeleteRelations(t)
@@ -86,13 +69,10 @@ func _01_RelationLoad(t *testing.T) {
 	}
 
 	/* Load existing relation  2996187 */
-	if r, err_n := ChSet.RelationLoad("12993"); err_n != nil {
+	if _, err_n := ChSet.RelationLoad("12993"); err_n != nil {
 		log.Println("_01_RelationLoad. RelationLoad")
 		t.Fatal(err_n)
-	} else {
-		spew.Dump(r)
 	}
-
 	_ChangeSetClose(t, ChSet)
 
 	//t.Fatal("test view")
@@ -147,7 +127,7 @@ func _03_ModifyRelations(t *testing.T) {
 		return
 	}
 
-	req.SetDebug()
+	//req.SetDebug()
 
 	ChSet, err := req.Changesets("modify")
 	if err != nil {
@@ -206,7 +186,7 @@ func _04_DeleteRelations(t *testing.T) {
 		return
 	}
 
-	req.SetDebug()
+	//req.SetDebug()
 
 	ChSet, err := req.Changesets("delete")
 	if err != nil {
