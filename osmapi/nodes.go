@@ -137,6 +137,7 @@ func (ChSet *ChangeSetSt) NewNode(Lat, Lon string) (*NodeSt, error) {
 	n.Timestamp = tm.Format(TimeFormatLayout)
 
 	ChSet._addNode(&n)
+	ChSet.OsmCh.ChangeType = "node"
 
 	return &n, nil
 }

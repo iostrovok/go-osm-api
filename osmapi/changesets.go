@@ -3,7 +3,7 @@ package osmapi
 import (
 	"encoding/xml"
 	"errors"
-	//"time"
+	"log"
 )
 
 /* ===
@@ -151,6 +151,8 @@ func (ChSet *ChangeSetSt) Upload() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	log.Println("REEEEEEEED: /diffResult/" + ChSet.OsmCh.ChangeType + "/@new_id")
 
 	old_id := xml_str(data, "/diffResult/"+ChSet.OsmCh.ChangeType+"/@old_id")
 	new_id := xml_str(data, "/diffResult/"+ChSet.OsmCh.ChangeType+"/@new_id")
