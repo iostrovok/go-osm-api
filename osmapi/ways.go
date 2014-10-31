@@ -3,8 +3,7 @@ package osmapi
 import (
 	"encoding/xml"
 	"errors"
-	"github.com/davecgh/go-spew/spew"
-	"log"
+	"gopkg.in/xmlpath.v2"
 	"strconv"
 	"time"
 )
@@ -60,10 +59,11 @@ When we want to modify or delete node we have get infomation from api.site
 */
 func (ChSet *ChangeSetSt) WayNew() (*WaySt, error) {
 	w := WaySt{}
+	w.Tags = nil
 	w.Nodes = nil
+	w.OsmId = "-1"
 	w.ReqId = ChSet.Id
 	w.Version = "1"
-	w.OsmId = "-1"
 	w.Visible = "true"
 	w.IsNew = true
 
@@ -75,10 +75,7 @@ func (ChSet *ChangeSetSt) WayNew() (*WaySt, error) {
 	return &w, nil
 }
 
-/*
-When we want to modify or delete node we have get infomation from api.site
-*/
-func (ChSet *ChangeSetSt) WayLoad(OsmId string) (*WaySt, error) {
+func (ChSet *ChangeSetSt) WayLoadData(OsmId string) (*xmlpath.Node, error) {
 
 	/* Answer has to be empty */
 	data, err := ChSet.Request.GetXML("/api/0.6/way/" + OsmId)
@@ -86,15 +83,29 @@ func (ChSet *ChangeSetSt) WayLoad(OsmId string) (*WaySt, error) {
 		return nil, err
 	}
 
-	spew.Dump(data)
-	log.Println("\n===========================\n/osm/way/tag\n")
-	spew.Dump(xml_slice(data, "/osm/way/tag", []string{"k", "v"}))
-	log.Println("\n===========================\n/osm/way/nd\n")
+	if "" == xml_str(data, "/osm/way/@id") {
+		return nil, errors.New("WayLoadData. Way [" + OsmId + "]no found.")
+	}
 
-	w := WaySt{}
-	w.Tags = nil
-	w.Nodes = nil
-	w.ReqId = ChSet.Id
+	return data, nil
+}
+
+/*
+When we want to modify or delete node we have get infomation from api.site
+*/
+func (ChSet *ChangeSetSt) WayLoad(OsmId string) (*WaySt, error) {
+
+	/* Answer has to be empty */
+	data, err := ChSet.WayLoadData(OsmId)
+	if err != nil {
+		return nil, err
+	}
+
+	w, err_w := ChSet.WayNew()
+	if err_w != nil {
+		return nil, err_w
+	}
+
 	w.OsmId = OsmId
 	w.Version = xml_str(data, "/osm/way/@version")
 	w.Visible = xml_str(data, "/osm/way/@visible")
@@ -102,10 +113,7 @@ func (ChSet *ChangeSetSt) WayLoad(OsmId string) (*WaySt, error) {
 	w.User = xml_str(data, "/osm/way/@user")
 	w.IsNew = false
 
-	tm := time.Now()
-	w.Timestamp = tm.Format(TimeFormatLayout)
-
-	ChSet.OsmCh._setWay(&w)
+	ChSet.OsmCh._setWay(w)
 
 	for _, v := range xml_slice(data, "/osm/way/nd", []string{"ref"}) {
 		if v["ref"] == "" {
@@ -120,7 +128,7 @@ func (ChSet *ChangeSetSt) WayLoad(OsmId string) (*WaySt, error) {
 		w._add_tag(v["k"], v["v"])
 	}
 
-	return &w, nil
+	return w, nil
 }
 
 func (w *WaySt) _add_tag(k, v string) {
@@ -145,7 +153,7 @@ func (ChSet *ChangeSetSt) LoadRef(ref string) error {
 		return errors.New("LoadRef. No way changeset")
 	}
 
-	n, err := ChSet.Request.LoadNodeDate(ref)
+	n, err := ChSet.LoadNodeDate(ref)
 	if err != nil {
 		return err
 	}
@@ -354,7 +362,6 @@ func (ChSet *ChangeSetSt) _update_way_id() error {
 }
 
 func (w *WaySt) _update_way_id(NextId string) error {
-	log.Printf("-----+++++=========== %s", w.IsNew)
 	if w.IsNew {
 		w.OsmId = NextId
 	}
