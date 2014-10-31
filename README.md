@@ -194,7 +194,7 @@ See example for more inforamtion. They are in "./osmapi/example/" path.
 		log.Fatal(err)
 	}
 
-### Create newg way  
+### Create new way  
 
 	/* Create new way */
 	way, err := ChSet.WayNew()
@@ -239,5 +239,58 @@ See example for more inforamtion. They are in "./osmapi/example/" path.
 
 ### Delete node with id "123456789" from way & changeset
 	if err := ChSet.WayDelNode("123456789"); err != nil {
+		log.Fatal(err)
+	} 
+
+## Relations
+
+### Common action
+
+	/* Request object creating */
+	ChSet, err := req.Changesets("modify") // "delete", "create"
+	if err != nil {
+		log.Fatal(err)
+	}
+
+### Read existing relation  
+
+	/* Loading existing relation data */
+	if _, err := ChSet.RelationLoad("12993"); err_n != nil {
+	if err != nil {
+		log.Fatal(err)
+	}
+
+### Create new relation  
+
+	/* Create new relation */
+	way, err := ChSet.RelationNew()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+### Add exists node and ways to relation
+
+	if err := ChSet.RelationAddMember("way", "52868", "outer"); err != nil {
+		log.Fatal(err)
+	} 
+
+	if err := ChSet.RelationAddMember("node", "52868", "outer"); err != nil {
+		log.Fatal(err)
+	} 
+
+
+### Delete all members from way 
+
+	if err := ChSet.RelationDelAllMembers(); err != nil {
+		log.Fatal(err)
+	}
+
+### Delete node with id "123456789" from way & changeset
+
+	if err := ChSet.RelationDelMember("way", "52868"); err != nil {
+		log.Fatal(err)
+	} 
+
+	if err := ChSet.RelationDelMember("node", "52868"); err != nil {
 		log.Fatal(err)
 	} 
