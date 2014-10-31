@@ -179,137 +179,47 @@ func (OsmCh *OsmChangeSt) _setRelation(relation *RelationSt) error {
 
 }
 
-/*
-func (ChSet *ChangeSetSt) RelationAddNode(n *NodeSt, after_node_id ...string) (string, error) {
+func (ChSet *ChangeSetSt) RelationDelMember(t, ref string) error {
 	// Answer has to be empty
-	if !ChSet._checkRelation() {
-		//return "", errors.New("RelationAddNode. No relation changeset")
-	}
-
-	if n.OsmId == "" {
-		id, err := ChSet._next_ref_id()
-		if err != nil {
-			return "", err
-		}
-		n.OsmId = id
-	}
-
-	tm := time.Now()
-	n.Timestamp = tr.Format(TimeFormatLayout)
-
-	// TODO: Node already added into ChangeSet
-	// ChSet.OsmCh._addNode(n)
-	if err := ChSet._put_ref_to_relation(n.OsmId, after_node_id...); err != nil {
-		return "", err
-	}
-
-	ChSet._update_relation_id()
-
-	return n.OsmId, nil
-}
-
-
-func (ChSet *ChangeSetSt) RelationDelAllMembers() error {
-	// Answer has to be empty
-	if !ChSet._checkRelation() {
-		return errors.New("RelationDelNode. No relation changeset")
-	}
-
-	ChSet.DelAllNodes()
-	if err := ChSet._del_all_members_from_relation(); err != nil {
-		return err
-	}
-
-	return nil
-}
-*/
-/*
-func (ChSet *ChangeSetSt) RelationDelMember(OsmId string) error {
-	// Answer has to be empty
-	if !ChSet._checkRelation() {
-		return errors.New("RelationDelNode. No relation changeset")
-	}
-
-	ChSet.OsmCh.DelMember(OsmId)
-	//	if err := ChSet._del_ref_from_relation(OsmId); err != nil {
-	//		return err
-	//	}
-
-	return nil
-}
-*/
-/*
-func (ChSet *ChangeSetSt) _checkRelation() bool {
-	return ChSet.OsmCh._checkRelation()
-}
-*/
-/*
-func (OsmCh *OsmChangeSt) _checkRelation() bool {
-	switch OsmCh.Type {
-	case "modify":
-		if OsmCh.Modify.Relation != nil {
-			return true
-		}
-	case "create":
-		if OsmCh.Create.Relation != nil {
-			return true
-		}
-	case "delete":
-		if OsmCh.Delete.Relation != nil {
-			return true
-		}
-	}
-	return false
-}
-
-*/
-
-/*
-
-func (ChSet *ChangeSetSt) _del_all_ref_from_relation() error {
 	switch ChSet.OsmCh.Type {
 	case "modify":
-		ChSet.OsmCh.Modify.Relation = nil
-		return nil
+		return ChSet.OsmCh.Modify.Relation._del_member(t, ref)
 	case "create":
-		ChSet.OsmCh.Create.Relation = nil
-		return nil
+		return ChSet.OsmCh.Create.Relation._del_member(t, ref)
 	case "delete":
-		ChSet.OsmCh.Delete.Relation = nil
-		return nil
-	}
-
-	return errors.New("_del_all_ref_from_relation. No relation changeset")
-}
-
-func (ChSet *ChangeSetSt) _del_ref_from_relation(ref string) error {
-	switch ChSet.OsmCh.Type {
-	case "modify":
-		return ChSet.OsmCh.Modify.Relation._del_ref_from_relation(ref)
-	case "create":
-		return ChSet.OsmCh.Create.Relation._del_ref_from_relation(ref)
-	case "delete":
-		return ChSet.OsmCh.Delete.Relation._del_ref_from_relation(ref)
+		return ChSet.OsmCh.Delete.Relation._del_member(t, ref)
 	}
 
 	return errors.New("_del_ref_from_relation. No relation changeset")
 }
 
+func (ChSet *ChangeSetSt) RelationDelAllMembers() error {
 
-func (w *RelationSt) _del_ref_from_relation(NodeId string) error {
-
-	w._check_nodes()
-
-	nds := []*RelationNdSt{}
-	for _, v := range w.Nodes {
-
-		if v.Ref != NodeId {
-			nds = append(nds, v)
-		}
+	switch ChSet.OsmCh.Type {
+	case "modify":
+		ChSet.OsmCh.Modify.Relation.Members = nil
+	case "create":
+		ChSet.OsmCh.Create.Relation.Members = nil
+	case "delete":
+		ChSet.OsmCh.Delete.Relation.Members = nil
+	default:
+		return errors.New("RelationDelAllMembers. No relation changeset")
 	}
 
-	w.Nodes = nds
 	return nil
 }
-*/
-//======================
+
+func (r *RelationSt) _del_member(t, ref string) error {
+
+	if r.Members != nil {
+		nds := []*MemberSt{}
+		for _, v := range r.Members {
+			if v.Ref != ref || v.Type != t {
+				nds = append(nds, v)
+			}
+		}
+		r.Members = nds
+	}
+
+	return nil
+}

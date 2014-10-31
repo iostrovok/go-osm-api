@@ -171,11 +171,23 @@ func _03_ModifyRelations(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if err := ChSet.RelationDelMember("node", "1282045"); err != nil {
+		log.Println("_03_ModifyRelations. RelationDelMember 1282045")
+		t.Fatal(err)
+	}
+
+	if err := ChSet.RelationDelMember("way", "52868"); err != nil {
+		log.Println("_03_ModifyRelations. RelationDelMember 1282045")
+		t.Fatal(err)
+	}
+
 	// Now our sequence is: -2 -1 -5 -4 -6
 	if TestRelationId, err = ChSet.Upload(); err != nil {
 		log.Println("_03_ModifyRelations. Upload")
 		t.Fatal(err)
 	}
+
+	//req.SetDebug(false)
 
 	_ChangeSetClose(t, ChSet)
 
@@ -206,6 +218,11 @@ func _04_DeleteRelations(t *testing.T) {
 	if _, err_n := ChSet.RelationLoad(TestRelationId); err_n != nil {
 		log.Println("_04_DeleteRelations. RelationLoad")
 		t.Fatal(err_n)
+	}
+
+	if err := ChSet.RelationDelAllMembers(); err != nil {
+		log.Println("_04_DeleteRelations. RelationDelAllMember")
+		t.Fatal(err)
 	}
 
 	if TestRelationId, err = ChSet.Upload(); err != nil {
