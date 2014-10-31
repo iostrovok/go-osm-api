@@ -71,6 +71,7 @@ func (ChSet *ChangeSetSt) WayNew() (*WaySt, error) {
 	w.Timestamp = tm.Format(TimeFormatLayout)
 
 	ChSet.OsmCh._setWay(&w)
+	ChSet.OsmCh.ChangeType = "way"
 
 	return &w, nil
 }
@@ -161,7 +162,7 @@ func (ChSet *ChangeSetSt) LoadRef(ref string) error {
 	tm := time.Now()
 	n.Timestamp = tm.Format(TimeFormatLayout)
 
-	ChSet.OsmCh._addNode(n)
+	ChSet._addNode(n)
 	if err := ChSet._put_ref_to_way(n.OsmId); err != nil {
 		return err
 	}
@@ -186,8 +187,6 @@ func (ChSet *ChangeSetSt) WayAddNode(n *NodeSt, after_node_id ...string) (string
 	tm := time.Now()
 	n.Timestamp = tm.Format(TimeFormatLayout)
 
-	// TODO: Node already added into ChangeSet
-	// ChSet.OsmCh._addNode(n)
 	if err := ChSet._put_ref_to_way(n.OsmId, after_node_id...); err != nil {
 		return "", err
 	}
@@ -200,7 +199,7 @@ func (ChSet *ChangeSetSt) WayAddNode(n *NodeSt, after_node_id ...string) (string
 func (ChSet *ChangeSetSt) WayDelAllNodes() error {
 	/* Answer has to be empty */
 	if !ChSet._checkWay() {
-		return errors.New("WayDelNode. No way changeset")
+		return errors.New("WayDelAllNodes. No way changeset")
 	}
 
 	ChSet.DelAllNodes()
@@ -217,7 +216,7 @@ func (ChSet *ChangeSetSt) WayDelNode(OsmId string) error {
 		return errors.New("WayDelNode. No way changeset")
 	}
 
-	ChSet.OsmCh.DelNode(OsmId)
+	ChSet.DelNode(OsmId)
 	if err := ChSet._del_ref_from_way(OsmId); err != nil {
 		return err
 	}
