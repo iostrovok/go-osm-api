@@ -279,13 +279,13 @@ See example for more inforamtion. They are in "./osmapi/example/" path.
 	} 
 
 
-### Delete all members from way 
+### Delete all members from members 
 
 	if err := ChSet.RelationDelAllMembers(); err != nil {
 		log.Fatal(err)
 	}
 
-### Delete node with id "123456789" from way & changeset
+### Delete node/way with id "52868" from members
 
 	if err := ChSet.RelationDelMember("way", "52868"); err != nil {
 		log.Fatal(err)
