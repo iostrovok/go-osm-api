@@ -59,12 +59,14 @@ See example for more inforamtion. They are in "./osmapi/example/" path.
 	if req == nil {
 		log.Fatal("Request create")
 	}
-
+	
 	/* Make object for request */
 	ChSet, err := req.Changesets("create")
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	ChSet.Generator("My Super System")
 
 	/* Create new node */
 	node, err_n := ChSet.NewNode(Lat, Lon)

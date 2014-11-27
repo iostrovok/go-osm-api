@@ -11,10 +11,10 @@ Changesets
 */
 
 type ChangeSetSt struct {
-	Id      string
-	Request *MyRequestSt
-	OsmCh   *OsmChangeSt
-	//Type   string     // node, way rel
+	Id        string
+	Request   *MyRequestSt
+	OsmCh     *OsmChangeSt
+	UserAgent string
 }
 
 type ChangeSt struct {
@@ -51,11 +51,19 @@ func (r *MyRequestSt) Changesets(t string) (*ChangeSetSt, error) {
 		return nil, err
 	}
 
+	if r.UserAgent != "" {
+		c.UserAgent = r.UserAgent
+	}
+
 	if err := c.OsmChange(t); err != nil {
 		return nil, err
 	}
 
 	return &c, nil
+}
+
+func (ChSet *ChangeSetSt) Generator(t string) {
+	ChSet.UserAgent = t
 }
 
 /*   */
@@ -68,7 +76,7 @@ func (ChSet *ChangeSetSt) OsmChange(t string) error {
 
 	OsmCh.Type = t
 	OsmCh.Version = ProtocolVersion
-	OsmCh.Generator = UserAgent
+	OsmCh.Generator = ChSet.UserAgent
 	ch := ChangeSt{[]*NodeSt{}, nil, nil}
 
 	switch OsmCh.Type {
@@ -111,8 +119,8 @@ func (ChSet *ChangeSetSt) Create() error {
 
 	t := OsmSt{}
 	t.Version = "0.6"
-	t.Generator = UserAgent
-	t.Changeset = &TagListSt{[]*TagSt{NewTag("comment", "changeset comment"), NewTag("created_by", UserAgent)}}
+	t.Generator = ChSet.UserAgent
+	t.Changeset = &TagListSt{[]*TagSt{NewTag("comment", "changeset comment"), NewTag("created_by", ChSet.UserAgent)}}
 	body2, err2 := xml.MarshalIndent(t, "", "")
 	if err2 != nil {
 		return err2

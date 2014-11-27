@@ -38,11 +38,12 @@ func (p *myjar) Cookies(u *url.URL) []*http.Cookie {
 }
 
 type MyRequestSt struct {
-	User  string
-	Pass  string
-	Url   string
-	Debug bool
-	Jar   *myjar
+	User      string
+	Pass      string
+	Url       string
+	UserAgent string
+	Debug     bool
+	Jar       *myjar
 }
 
 type Miscellaneous struct {
@@ -90,6 +91,10 @@ func (m *MyRequestSt) SetUrl(url string) {
 	m.Url = url
 }
 
+func (m *MyRequestSt) Generator(user_agent string) {
+	m.UserAgent = user_agent
+}
+
 func (m *MyRequestSt) makeSendRequest(Type, Url string, Content ...string) (string, error) {
 
 	var err error
@@ -125,7 +130,7 @@ func (m *MyRequestSt) makeSendRequest(Type, Url string, Content ...string) (stri
 		req.SetBasicAuth(m.User, m.Pass)
 	}
 
-	req.Header.Set("User-Agent", UserAgent)
+	req.Header.Set("User-Agent", m.UserAgent)
 
 	client := &http.Client{}
 	client.Jar = m.Jar
