@@ -1,7 +1,5 @@
 # GOLANG interface for OpenStreetMap API v0.6
 
-	NOTICE! It is developer version.
-
 ### Introduction
 
 Please see more inforamtion in OSM wiki: http://wiki.openstreetmap.org/wiki/API_v0.6
@@ -9,7 +7,6 @@ Please see more inforamtion in OSM wiki: http://wiki.openstreetmap.org/wiki/API_
 ### Installing 
 
 	go get github.com/iostrovok/go-osm-api/osmapi
-
 
 ### How use example.
 
