@@ -43,6 +43,28 @@ See example for more inforamtion. They are in "./osmapi/example/" path.
 		log.Fatal(err)
 	}
 
+### Get date of exists way or node (point)
+
+	import "github.com/iostrovok/go-osm-api/osmapi"
+	import "log"
+
+	req := osmapi.MyRequest(login, pass)
+	if req == nil {
+		log.Fatal("Request create")
+	}
+	
+	/* 
+		Load node's date for view information.
+	*/
+	if node, err := req.LoadNodeDate("1442930428"); err != nil {
+		log.Fatal("error LoadNodeDate")
+	} else {
+		/*  Read tags from nodes */
+		log.Println( "name:en: "+ node.Tag("name:en"))
+		log.Println( "name:ru: "+ node.Tag("name:ru"))
+		log.Println( "name:uk: "+ node.Tag("name:uk"))
+	}
+
 ### Create new node (point)
 
 	import "github.com/iostrovok/go-osm-api/osmapi"

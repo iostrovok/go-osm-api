@@ -3,7 +3,7 @@ package osmapi
 import (
 	"encoding/xml"
 	"errors"
-	"gopkg.in/xmlpath.v2"
+	//"gopkg.in/xmlpath.v2"
 	"strconv"
 	"time"
 )
@@ -75,28 +75,13 @@ func (ChSet *ChangeSetSt) WayNew() (*WaySt, error) {
 	return &w, nil
 }
 
-func (ChSet *ChangeSetSt) WayLoadData(OsmId string) (*xmlpath.Node, error) {
-
-	/* Answer has to be empty */
-	data, err := ChSet.Request.GetXML("/api/0.6/way/" + OsmId)
-	if err != nil {
-		return nil, err
-	}
-
-	if "" == xml_str(data, "/osm/way/@id") {
-		return nil, errors.New("WayLoadData. Way [" + OsmId + "]no found.")
-	}
-
-	return data, nil
-}
-
 /*
 When we want to modify or delete node we have get infomation from api.site
 */
 func (ChSet *ChangeSetSt) WayLoad(OsmId string) (*WaySt, error) {
 
 	/* Answer has to be empty */
-	data, err := ChSet.WayLoadData(OsmId)
+	data, err := ChSet.Request.WayLoadData(OsmId)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +138,7 @@ func (ChSet *ChangeSetSt) LoadRef(ref string) error {
 		return errors.New("LoadRef. No way changeset")
 	}
 
-	n, err := ChSet.LoadNodeDate(ref)
+	n, err := ChSet.Request.LoadNodeDate(ref)
 	if err != nil {
 		return err
 	}
@@ -408,6 +393,14 @@ func (w *WaySt) _put_ref_to_way(NodeId string, after_node_id ...string) error {
 	}
 	w.Nodes = nds
 	return nil
+}
+
+func (w *WaySt) NodeIds() []string {
+	out := []string{}
+	for _, v := range w.Nodes {
+		out = append(out, v.Ref)
+	}
+	return out
 }
 
 //======================

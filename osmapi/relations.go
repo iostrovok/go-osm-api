@@ -109,9 +109,9 @@ func (ChSet *ChangeSetSt) RelationAddMember(t, ref, role string) error {
 	err := errors.New("RelationAddMember. Bad member type. Must be [way|node]. Now is " + t)
 	switch t {
 	case "node":
-		_, err = ChSet.LoadNodeDate(ref)
+		_, err = ChSet.Request.LoadNodeDate(ref)
 	case "way":
-		_, err = ChSet.WayLoadData(ref)
+		_, err = ChSet.Request.WayLoadData(ref)
 	}
 
 	if err != nil {

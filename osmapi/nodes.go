@@ -28,7 +28,7 @@ func NewTag(k, v string) *TagSt {
 }
 
 type NodeSt struct {
-	Tag       []*TagSt `xml:"tag,omitempty"`
+	Tags      []*TagSt `xml:"tag,omitempty"`
 	OsmId     string   `xml:"id,attr,omitempty"`
 	ReqId     string   `xml:"changeset,attr"`
 	Visible   string   `xml:"visible,attr"`
@@ -40,14 +40,23 @@ type NodeSt struct {
 	Timestamp string   `xml:"timestamp,attr,omitempty"`
 }
 
+func (c *NodeSt) Tag(k string) (string, bool) {
+	for _, one := range c.Tags {
+		if one.Key == k {
+			return one.Val, true
+		}
+	}
+	return "", false
+}
+
 func (c *NodeSt) AddTag(k, v string) {
 	n := []*TagSt{NewTag(k, v)}
-	for _, one := range c.Tag {
+	for _, one := range c.Tags {
 		if one.Key != k {
 			n = append(n, one)
 		}
 	}
-	c.Tag = n
+	c.Tags = n
 }
 
 /*
@@ -62,7 +71,7 @@ func (ChSet *ChangeSetSt) LoadNodeDate(OsmId string) (*NodeSt, error) {
 	}
 
 	n := NodeSt{}
-	n.Tag = []*TagSt{}
+	n.Tags = []*TagSt{}
 	n.Lat = xml_str(data, "/osm/node/@lat")
 	n.Lon = xml_str(data, "/osm/node/@lon")
 	n.OsmId = OsmId
@@ -82,7 +91,7 @@ func (ChSet *ChangeSetSt) LoadNodeDate(OsmId string) (*NodeSt, error) {
 		t := TagSt{}
 		t.Key = v["k"]
 		t.Val = v["v"]
-		n.Tag = append(n.Tag, &t)
+		n.Tags = append(n.Tags, &t)
 	}
 
 	return &n, nil
@@ -125,7 +134,7 @@ When we creat new node
 func (ChSet *ChangeSetSt) NewNode(Lat, Lon string) (*NodeSt, error) {
 
 	n := NodeSt{}
-	n.Tag = []*TagSt{}
+	n.Tags = []*TagSt{}
 	n.ReqId = ChSet.Id
 	n.OsmId = ""
 	n.Lon = Lon

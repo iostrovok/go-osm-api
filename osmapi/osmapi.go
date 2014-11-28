@@ -95,6 +95,56 @@ func (m *MyRequestSt) Generator(user_agent string) {
 	m.UserAgent = user_agent
 }
 
+func (m *MyRequestSt) LoadNodeDate(OsmId string) (*NodeSt, error) {
+
+	/* Answer has to be empty */
+	data, err := m.GetXML("/api/0.6/node/" + OsmId)
+	if err != nil {
+		return nil, err
+	}
+
+	n := NodeSt{}
+	n.Tags = []*TagSt{}
+	n.Lat = xml_str(data, "/osm/node/@lat")
+	n.Lon = xml_str(data, "/osm/node/@lon")
+	n.OsmId = OsmId
+	n.ReqId = xml_str(data, "/osm/node/@changeset")
+	n.Timestamp = xml_str(data, "/osm/node/@timestamp")
+	n.Version = xml_str(data, "/osm/node/@version")
+	n.Visible = xml_str(data, "/osm/node/@visible")
+
+	if n.Lon == "" || n.Lat == "" {
+		return nil, errors.New("Note " + OsmId + " not found")
+	}
+
+	for _, v := range xml_slice(data, "/osm/node/tag", []string{"k", "v"}) {
+		if v["k"] == "" || v["v"] == "" {
+			continue
+		}
+		t := TagSt{}
+		t.Key = v["k"]
+		t.Val = v["v"]
+		n.Tags = append(n.Tags, &t)
+	}
+
+	return &n, nil
+}
+
+func (m *MyRequestSt) WayLoadData(OsmId string) (*xmlpath.Node, error) {
+
+	/* Answer has to be empty */
+	data, err := m.GetXML("/api/0.6/way/" + OsmId)
+	if err != nil {
+		return nil, err
+	}
+
+	if "" == xml_str(data, "/osm/way/@id") {
+		return nil, errors.New("WayLoadData. Way [" + OsmId + "]no found.")
+	}
+
+	return data, nil
+}
+
 func (m *MyRequestSt) makeSendRequest(Type, Url string, Content ...string) (string, error) {
 
 	var err error
