@@ -33,8 +33,6 @@ func _01_ReadNode(t *testing.T) {
 		t.Fatal(err_n)
 	}
 
-	//
-
 	/* Upload new data */
 	if source, find := node.Tag("source"); !find {
 		log.Println()
