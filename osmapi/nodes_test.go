@@ -1,6 +1,7 @@
 package osmapi
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
 	"strconv"
@@ -13,6 +14,7 @@ func Test_Node(t *testing.T) {
 	_01_NodeCreate(t)
 	_02_NodeChange(t)
 	_03_NodeDelete(t)
+	_04_NodeChangeMassive(t)
 }
 
 func _01_NodeCreate(t *testing.T) {
@@ -67,6 +69,60 @@ func _01_NodeCreate(t *testing.T) {
 	_ChangeSetClose(t, ChSet)
 
 	//t.Fatal("test view")
+}
+
+func _04_NodeChangeMassive(t *testing.T) {
+
+	t.Log("\n\n--------------------- _04_NodeChangeMassive -----------------------\n\n")
+	ids := []string{}
+	i := 1
+	for i < 4 {
+		i++
+		_01_NodeCreate(t)
+		if TestNodeId == "" {
+			log.Fatal("_04_NodeChangeMassive. No set TestNodeId")
+		}
+		ids = append(ids, TestNodeId)
+	}
+
+	req := init_req(t, "ChangeSetUpload")
+	if req == nil {
+		return
+	}
+
+	req.SetDebug()
+
+	ChSet, err := req.Changesets("modify")
+	if err != nil {
+		log.Println("_04_NodeChangeMassive. Create")
+		t.Fatal(err)
+	}
+
+	for _, id := range ids {
+		node, err_n := ChSet.LoadNode(id)
+		if err_n != nil {
+			log.Println("_04_NodeChangeMassive. LoadNode")
+			t.Fatal(err_n)
+		}
+
+		/*  Set new data */
+		node.AddTag("name:en", fmt.Sprintf("Anywhere in London - %s", id))
+		node.AddTag("name:ru", fmt.Sprintf("Поселок где-то в лондоне - %s", id))
+		node.AddTag("name:uk", fmt.Sprintf("Поселок где-то в лондоне - %s", id))
+		node.AddTag("place", "hamlet")
+	}
+
+	req.SetDebug()
+
+	/* Upload new data */
+	if _, err := ChSet.Upload(); err != nil {
+		log.Println("_04_NodeChangeMassive. Upload")
+		t.Fatal(err)
+	}
+
+	_ChangeSetClose(t, ChSet)
+
+	t.Fatal("test view")
 }
 
 func _02_NodeChange(t *testing.T) {
