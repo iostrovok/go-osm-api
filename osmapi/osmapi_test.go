@@ -26,6 +26,8 @@ func init_req(t *testing.T, title string) *MyRequestSt {
 		return nil
 	}
 
+	log.Println("OSM_USER: " + login + ". OSM_PASSWD: " + pass + ". OSM_URL: " + url)
+
 	req := MyRequest()
 	req.UserPass(login, pass)
 	if url == "" {
