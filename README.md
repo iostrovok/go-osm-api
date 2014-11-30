@@ -105,7 +105,16 @@ See example for more inforamtion. They are in "./osmapi/example/" path.
 	} else {
 		log.Printf("Create node. Id; %s\n", newId)
 	}
-
+	/*
+		If you want to see uploaded data without sending you can use do so:
+		req.SetDebug(); // eq req.SetDebug(true) 
+		if newId, err := ChSet.FakeUpload(); err != nil { 
+			log.Fatal(err)
+		} else {
+			log.Printf("Create node. Id; %s\n", newId)
+		}
+		req.SetDebug(false); // clean debug 
+	*/
 	/* Fixed result into OSM */
 	if err := ChSet.Close(); err != nil {
 		log.Fatal(err)

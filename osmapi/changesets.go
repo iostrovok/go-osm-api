@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"gopkg.in/xmlpath.v2"
+	"log"
 )
 
 /* ===
@@ -142,16 +143,32 @@ func (ChSet *ChangeSetSt) Create() error {
 /* ===
 Changesets: Diff upload: POST /api/0.6/changeset/#id/upload
 */
-func (ChSet *ChangeSetSt) Upload() (string, error) {
+func (ChSet *ChangeSetSt) FakeUpload() (string, error) {
+	return ChSet.Upload(false)
+}
+
+func (ChSet *ChangeSetSt) Upload(no_sends ...bool) (string, error) {
 
 	//(c *ChangeSetSt)
 	if ChSet.Id == "" {
 		errors.New("Cann't use uninitialize")
 	}
 
+	no_send := false
+	if len(no_sends) > 0 {
+		no_send = no_sends[0]
+	}
+
 	body, err_m := xml.MarshalIndent(ChSet.OsmCh, "", "")
 	if err_m != nil {
 		return "", err_m
+	}
+
+	if no_send {
+		if ChSet.Request.Debug {
+			log.Printf("sedn_body = %s\n", body)
+		}
+		return "", errors.New("Using no_send param")
 	}
 
 	data, err := ChSet.Request.PostXML("/api/0.6/changeset/"+ChSet.Id+"/upload", string(body))
