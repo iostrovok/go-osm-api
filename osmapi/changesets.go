@@ -144,7 +144,7 @@ func (ChSet *ChangeSetSt) Create() error {
 Changesets: Diff upload: POST /api/0.6/changeset/#id/upload
 */
 func (ChSet *ChangeSetSt) FakeUpload() (string, error) {
-	return ChSet.Upload(false)
+	return ChSet.Upload(true)
 }
 
 func (ChSet *ChangeSetSt) Upload(no_sends ...bool) (string, error) {
