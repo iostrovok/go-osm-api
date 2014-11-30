@@ -2,7 +2,6 @@ package osmapi
 
 import (
 	"encoding/xml"
-	"errors"
 	"time"
 )
 
@@ -62,45 +61,10 @@ func (c *NodeSt) AddTag(k, v string) {
 /*
 When we want to modify or delete node we have get infomation from api.site
 */
-func (ChSet *ChangeSetSt) LoadNodeDate(OsmId string) (*NodeSt, error) {
-
-	/* Answer has to be empty */
-	data, err := ChSet.Request.GetXML("/api/0.6/node/" + OsmId)
-	if err != nil {
-		return nil, err
-	}
-
-	n := NodeSt{}
-	n.Tags = []*TagSt{}
-	n.Lat = xml_str(data, "/osm/node/@lat")
-	n.Lon = xml_str(data, "/osm/node/@lon")
-	n.OsmId = OsmId
-	n.ReqId = xml_str(data, "/osm/node/@changeset")
-	n.Timestamp = xml_str(data, "/osm/node/@timestamp")
-	n.Version = xml_str(data, "/osm/node/@version")
-	n.Visible = xml_str(data, "/osm/node/@visible")
-
-	if n.Lon == "" || n.Lat == "" {
-		return nil, errors.New("Note " + OsmId + " not found")
-	}
-
-	for _, v := range xml_slice(data, "/osm/node/tag", []string{"k", "v"}) {
-		if v["k"] == "" || v["v"] == "" {
-			continue
-		}
-		t := TagSt{}
-		t.Key = v["k"]
-		t.Val = v["v"]
-		n.Tags = append(n.Tags, &t)
-	}
-
-	return &n, nil
-}
-
 func (ChSet *ChangeSetSt) LoadNode(OsmId string) (*NodeSt, error) {
 
 	/* Answer has to be empty */
-	n, err := ChSet.LoadNodeDate(OsmId)
+	n, err := ChSet.Request.LoadNodeDate(OsmId)
 	if err != nil {
 		return nil, err
 	}

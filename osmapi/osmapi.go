@@ -21,9 +21,9 @@ const MainURL = "http://api.openstreetmap.org"
 const MainURLTest = "http://api06.dev.openstreetmap.org"
 const ProtocolVersion = "0.6"
 const TimeFormatLayout = "2006-01-02T15:04:05-07:00"
-const UserAgent = "Sputnik.Ru.Adminka" // Default user agent :)
-const User = "TestUser"                // Default user agent :)
-const UserId = "TestUser"              // Default user agent :)
+const UserAgent = "github.com/iostrovok/go-osm-api/osmapi" // Default user agent :)
+const User = "TestUser"                                    // Default user agent :)
+const UserId = "TestUser"                                  // Default user agent :)
 
 type myjar struct {
 	jar map[string][]*http.Cookie
