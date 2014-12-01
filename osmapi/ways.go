@@ -116,6 +116,16 @@ func (ChSet *ChangeSetSt) WayLoad(OsmId string) (*WaySt, error) {
 	return w, nil
 }
 
+func (w *WaySt) DelTag(k string) {
+	n := []*TagSt{}
+	for _, one := range w.Tags {
+		if one.Key != k {
+			n = append(n, one)
+		}
+	}
+	w.Tags = n
+}
+
 func (w *WaySt) _add_tag(k, v string) {
 	if k == "" || v == "" {
 		return

@@ -99,6 +99,9 @@ See example for more inforamtion. They are in "./osmapi/example/" path.
 	node.AddTag("name:uk", "Поселок где-то в лондоне")
 	node.AddTag("place", "street")
 
+	/* Delete existing tag */
+	node.DelTag("name")
+
 	/* Upload new data */
 	if newId, err := ChSet.Upload(); err != nil {
 		log.Fatal(err)
@@ -149,6 +152,8 @@ See example for more inforamtion. They are in "./osmapi/example/" path.
 		/*  Set new tag into data */
 		node.AddTag("name:en", "Akultsevo")
 		node.AddTag("name:uk", "Акульцево")
+		/* Delete existing tag */
+		node.DelTag("name")
 	}
 
 	/* 
@@ -251,6 +256,11 @@ See example for more inforamtion. They are in "./osmapi/example/" path.
 	if err != nil {
 		log.Fatal(err)
 	} 
+
+### Tag's action 
+	node.AddTag("name:tr", "Long way")
+	node.DelTag("name")
+
 
 ### Create and add node to first place of way
 	node, err := ChSet.NewNode("0.017183, "51.506286")

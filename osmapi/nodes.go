@@ -58,6 +58,16 @@ func (c *NodeSt) AddTag(k, v string) {
 	c.Tags = n
 }
 
+func (c *NodeSt) DelTag(k string) {
+	n := []*TagSt{}
+	for _, one := range c.Tags {
+		if one.Key != k {
+			n = append(n, one)
+		}
+	}
+	c.Tags = n
+}
+
 /*
 When we want to modify or delete node we have get infomation from api.site
 */
